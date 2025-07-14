@@ -11,10 +11,13 @@ class RedisClient {
     });
   }
 
-  async isAlive() {
-    const asyncping = promisify(this.client.ping)
+  isAlive() {
+    /* const asyncping = promisify(this.client.ping)
       .bind(this.client);
-    return (await asyncping()) === 'PONG';
+    const resp = await asyncping()
+    console.log(`*** ${resp} ***`)
+    return resp === 'PONG'; */
+    return this.client.connected;
   }
 
   async get(key) {
