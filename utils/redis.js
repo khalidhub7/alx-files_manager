@@ -14,9 +14,8 @@ class RedisClient {
   isAlive() {
     /* const asyncping = promisify(this.client.ping)
       .bind(this.client);
-    const resp = await asyncping()
-    console.log(`*** ${resp} ***`)
-    return resp === 'PONG'; */
+    return asyncping()
+      .then((resp) => resp === 'PONG'); */
     return this.client.connected;
   }
 
