@@ -10,15 +10,21 @@ const database = process.env.DB_DATABASE || 'files_manager';
 class DBClient {
   constructor() {
     this._isalive = false;
+    this.db = undefined;
+    this.connect();
+  }
+
+  connect() {
     MongoClient.connect(
       `mongodb://${host}:${port}`, { useUnifiedTopology: true },
-      (err, client) => {
-        if (!err) {
-          this._isalive = true;
-          this.db = client.db(database);
-        }
-      },
-    );
+    )
+      .then((client) => {
+        this._isalive = true;
+        this.db = client.db(database);
+      })
+      .catch((err) => {
+        console.log(`mongo connection failed ${err}`);
+      });
   }
 
   isAlive() { return this._isalive; }
