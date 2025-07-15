@@ -1,7 +1,4 @@
 import { MongoClient } from 'mongodb';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const host = process.env.DB_HOST || 'localhost';
 const port = process.env.DB_PORT || '27017';
@@ -9,21 +6,21 @@ const database = process.env.DB_DATABASE || 'files_manager';
 
 class DBClient {
   constructor() {
-    this._isalive = false;
     this.db = undefined;
+    this._isalive = false;
     this.connect();
   }
 
-  connect() {
+  async connect() {
     MongoClient.connect(
       `mongodb://${host}:${port}`, { useUnifiedTopology: true },
     )
       .then((client) => {
-        this._isalive = true;
         this.db = client.db(database);
+        this._isalive = true;
       })
       .catch((err) => {
-        console.log(`mongo connection failed ${err}`);
+        console.log(`mongo connection failed: ${err.message}`);
       });
   }
 
@@ -41,6 +38,5 @@ class DBClient {
     return countDocs;
   }
 }
-
 const dbClient = new DBClient();
 export default dbClient;
