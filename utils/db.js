@@ -12,9 +12,10 @@ class DBClient {
 
   connect() {
     // return promise to track connection
-    return MongoClient.connect(`mongodb://${host}:${port}`, {
+    const client = new MongoClient(`mongodb://${host}:${port}`, {
       useUnifiedTopology: true,
-    })
+    });
+    return client.connect()
       .then((client) => {
         this.db = client.db(database);
         this._isalive = true;
