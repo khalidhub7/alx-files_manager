@@ -16,7 +16,7 @@ class DBClient {
       useUnifiedTopology: true,
     });
     return client.connect()
-      .then((client) => {
+      .then(() => {
         this.db = client.db(database);
         this._isalive = true;
       })
