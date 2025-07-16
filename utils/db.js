@@ -6,10 +6,12 @@ const database = process.env.DB_DATABASE || 'files_manager';
 
 class DBClient {
   constructor() {
+    // start connection and save Promise to await later
     this.ready = this.connect();
   }
 
   connect() {
+    // return promise to track connection
     return MongoClient.connect(`mongodb://${host}:${port}`, {
       useUnifiedTopology: true,
     })
@@ -22,17 +24,15 @@ class DBClient {
       });
   }
 
-  isAlive() {
-    return this._isalive === true;
-  }
+  isAlive() { return this._isalive === true; }
 
   async nbUsers() {
-    await this.ready;
+    await this.ready; // wait for connection before running
     return this.db.collection('users').countDocuments({});
   }
 
   async nbFiles() {
-    await this.ready;
+    await this.ready; // wait for connection before running
     return this.db.collection('files').countDocuments({});
   }
 }
