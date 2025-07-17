@@ -24,7 +24,7 @@ class UsersController {
 
     if (insert.result.ok === 1) {
       const id = insert.insertedId;
-      return res.status(201).send({ email, id });
+      return res.status(201).send({ id, email });
     }
     return undefined;
   }
