@@ -23,5 +23,10 @@ class UtilsHelper {
       .findOne({ _id: new ObjectId(parentId) });
     return file;
   }
+
+  static async insertFileDoc(doc) {
+    await dbClient.db.collection('files')
+      .insertOne(doc);
+  }
 }
 export default UtilsHelper;

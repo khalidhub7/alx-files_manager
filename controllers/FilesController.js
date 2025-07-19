@@ -1,7 +1,6 @@
 import { promises as fsPromises } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import UtilsHelper from '../utils/utils';
-import dbClient from '../utils/db';
 
 class FilesController {
   static async postUpload(req, res) {
@@ -47,8 +46,7 @@ class FilesController {
     // handle folder creation
     if (type === 'folder') {
       // console.log(`***  ${JSON.stringify(newFileOrFolder)}  ***`);
-      await dbClient.db.collection('files')
-        .insertOne(newFileOrFolder);
+      await UtilsHelper.insertFileDoc(newFileOrFolder);
       // console.log(`***  ${JSON.stringify(newFileOrFolder)}  ***`);
       const { _id, ...rest } = newFileOrFolder;
       const updatedFolder = { id: _id, ...rest };
@@ -64,8 +62,7 @@ class FilesController {
       ...newFileOrFolder, localPath: `${path}/${fileName}`,
     };
 
-    const insert = await dbClient.db.collection('files')
-      .insertOne(fileData);
+    const insert = await UtilsHelper.insertFileDoc(fileData);
     newFileOrFolder = {
       id: insert.insertedId.toString(),
       ...newFileOrFolder,
