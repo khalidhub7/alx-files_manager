@@ -25,7 +25,7 @@ class FilesController {
     if (['file', 'image'].includes(type) && !data) {
       return res.status(400).send({ error: 'Missing data' });
     }
-    if (parentId !== Number('0')) {
+    if (Number(parentId) !== 0) {
       file = await dbClient.db.collection('files')
         .findOne({ _id: new ObjectId(parentId) });
       if (!file) {
