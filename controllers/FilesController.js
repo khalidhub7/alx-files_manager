@@ -58,8 +58,12 @@ class FilesController {
     await fsPromises.mkdir(path, { recursive: true });
     const fileName = uuidv4();
     const fileData = {
-      userId: userID, name, type,
-      parentId, isPublic, localPath: `${path}/${fileName}`,
+      userId: userID,
+      name,
+      type,
+      parentId,
+      isPublic,
+      localPath: `${path}/${fileName}`,
     };
     const insert = await dbClient.db.collection('files')
       .insertOne(fileData);
