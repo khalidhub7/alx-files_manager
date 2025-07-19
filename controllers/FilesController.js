@@ -10,11 +10,12 @@ class FilesController {
     if (!user) {
       return res.status(401).send({ error: 'Unauthorized' });
     }
+
     // get file info from request body
     const {
       name, type, parentId = 0, isPublic = false, data,
     } = req.body;
-    let file = null;
+
     // validate input & parent folder
     if (!name) {
       return res.status(400).send({ error: 'Missing name' });
@@ -23,49 +24,55 @@ class FilesController {
       return res.status(400).send({ error: 'Missing type' });
     }
     if (['file', 'image'].includes(type) && !data) {
+      // data must be in base64
       return res.status(400).send({ error: 'Missing data' });
     }
     if (Number(parentId) !== 0) {
-      file = await dbClient.db.collection('files')
+      const parentFolderDoc = await dbClient.db.collection('files')
         .findOne({ _id: new ObjectId(parentId) });
-      if (!file) {
+      if (!parentFolderDoc) {
         return res.status(400).send({ error: 'Parent not found' });
       }
-      if (file && file.type !== 'folder') {
+      if (parentFolderDoc.type !== 'folder') {
         return res.status(400).send({ error: 'Parent is not a folder' });
       }
     }
 
-    // insert new folder to db
+    // insert new folder or file to db
     const userID = user._id;
 
+    // shared metadata for both files and folders
     let newFileOrFolder = {
       userId: userID, name, type, isPublic, parentId,
     };
+
+    // handle folder creation
     if (type === 'folder') {
+      // console.log(`***  ${JSON.stringify(newFileOrFolder)}  ***`);
       await dbClient.db.collection('files')
         .insertOne(newFileOrFolder);
-      // const id = insert.insertedId.toString();
+      // console.log(`***  ${JSON.stringify(newFileOrFolder)}  ***`);
       const { _id, ...rest } = newFileOrFolder;
-      const updatedFile = { id: _id, ...rest };
-      return res.status(201).send(updatedFile);
+      const updatedFolder = { id: _id, ...rest };
+      return res.status(201).send(updatedFolder);
     }
 
-    // otherwise store file locally
+    // handle file/image: save metadata and store file locally
     const path = process.env.FOLDER_PATH || '/tmp/files_manager';
     await fsPromises.mkdir(path, { recursive: true });
+
     const fileName = uuidv4();
     const fileData = {
-      userId: userID,
-      name,
-      type,
-      parentId,
-      isPublic,
-      localPath: `${path}/${fileName}`,
+      ...newFileOrFolder, localPath: `${path}/${fileName}`,
     };
+
     const insert = await dbClient.db.collection('files')
       .insertOne(fileData);
-    newFileOrFolder = { id: insert.insertedId.toString(), ...newFileOrFolder };
+    newFileOrFolder = {
+      id: insert.insertedId.toString(),
+      ...newFileOrFolder,
+    };
+
     await fsPromises.writeFile(
       fileData.localPath, Buffer.from(data, 'base64'),
     );
