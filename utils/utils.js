@@ -25,8 +25,9 @@ class UtilsHelper {
   }
 
   static async insertFileDoc(doc) {
-    await dbClient.db.collection('files')
+    const insert = await dbClient.db.collection('files')
       .insertOne(doc);
+    return insert;
   }
 }
 export default UtilsHelper;
