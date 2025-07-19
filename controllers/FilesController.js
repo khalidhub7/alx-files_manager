@@ -6,7 +6,7 @@ import dbClient from '../utils/db';
 
 class FilesController {
   static async postUpload(req, res) {
-    const user = UtilsHelper.getUserByToken(req);
+    const user = await UtilsHelper.getUserByToken(req);
     if (!user) {
       return res.status(401).send({ error: 'Unauthorized' });
     }
@@ -14,6 +14,7 @@ class FilesController {
     const {
       name, type, parentId = 0, isPublic = false, data,
     } = req.body;
+    let file = null;
 
     // validate input & parent folder
     if (!name) {
@@ -25,8 +26,8 @@ class FilesController {
     if (['file', 'image'].includes(type) && !data) {
       return res.status(400).send({ error: 'Missing data' });
     }
-    if (parentId !== '0') {
-      const file = await dbClient.db.collection('files')
+    if (parentId !== Number('0')) {
+      file = await dbClient.db.collection('files')
         .findOne({ _id: new ObjectId(parentId) });
       if (!file) {
         return res.status(400).send({ error: 'Parent not found' });
@@ -37,30 +38,36 @@ class FilesController {
     }
 
     // insert new folder to db
-    const userID = user._id.toString();
-    if (type === 'folder') {
-      const file = {
-        userId: userID, name, type, parentId, isPublic,
+    const userID = user._id;
+    if (!file) {
+      file = {
+        userId: userID, name, type, isPublic, parentId,
       };
-      const insert = await dbClient.db.collection('files')
+    }
+    if (type === 'folder') {
+      await dbClient.db.collection('files')
         .insertOne(file);
-      file.id = insert.insertedId.toString();
-      return res.status(201).send(file);
+      // const id = insert.insertedId.toString();
+      const { _id, ...rest } = file;
+      const updatedFile = { id: _id, ...rest };
+      return res.status(201).send(updatedFile);
     }
 
     // otherwise store file locally
     const path = process.env.FOLDER_PATH || '/tmp/files_manager';
-    // create folder if not exists
     await fsPromises.mkdir(path, { recursive: true });
-
     const fileName = uuidv4();
     const fileData = {
-      userId: userID, name, type, parentId, isPublic, localPath: `${path}/${fileName}`,
+      userId: userID, name, type,
+      parentId, isPublic, localPath: `${path}/${fileName}`,
     };
+    const insert = await dbClient.db.collection('files')
+      .insertOne(fileData);
+    file = { id: insert.insertedId.toString(), ...file };
     await fsPromises.writeFile(
       fileData.localPath, Buffer.from(data, 'base64'),
     );
-    return res.status(201).send(fileData);
+    return res.status(201).send(file);
   }
 }
 
