@@ -1,6 +1,5 @@
 import { promises as fsPromises } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import { ObjectId } from 'mongodb';
 import UtilsHelper from '../utils/utils';
 import dbClient from '../utils/db';
 
@@ -28,8 +27,7 @@ class FilesController {
       return res.status(400).send({ error: 'Missing data' });
     }
     if (Number(parentId) !== 0) {
-      const parentFolderDoc = await dbClient.db.collection('files')
-        .findOne({ _id: new ObjectId(parentId) });
+      const parentFolderDoc = await UtilsHelper.getFileByParentId(parentId);
       if (!parentFolderDoc) {
         return res.status(400).send({ error: 'Parent not found' });
       }

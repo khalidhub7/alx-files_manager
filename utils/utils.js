@@ -20,7 +20,7 @@ class UtilsHelper {
 
   static async getFileByParentId(parentId) {
     const file = await dbClient.db.collection('files')
-      .findOne({ parentId });
+      .findOne({ _id: new ObjectId(parentId) });
     return file;
   }
 }
