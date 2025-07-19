@@ -15,7 +15,6 @@ class FilesController {
       name, type, parentId = 0, isPublic = false, data,
     } = req.body;
     let file = null;
-
     // validate input & parent folder
     if (!name) {
       return res.status(400).send({ error: 'Missing name' });
@@ -39,16 +38,15 @@ class FilesController {
 
     // insert new folder to db
     const userID = user._id;
-    if (!file) {
-      file = {
-        userId: userID, name, type, isPublic, parentId,
-      };
-    }
+
+    let newFileOrFolder = {
+      userId: userID, name, type, isPublic, parentId,
+    };
     if (type === 'folder') {
       await dbClient.db.collection('files')
-        .insertOne(file);
+        .insertOne(newFileOrFolder);
       // const id = insert.insertedId.toString();
-      const { _id, ...rest } = file;
+      const { _id, ...rest } = newFileOrFolder;
       const updatedFile = { id: _id, ...rest };
       return res.status(201).send(updatedFile);
     }
@@ -67,11 +65,11 @@ class FilesController {
     };
     const insert = await dbClient.db.collection('files')
       .insertOne(fileData);
-    file = { id: insert.insertedId.toString(), ...file };
+    newFileOrFolder = { id: insert.insertedId.toString(), ...newFileOrFolder };
     await fsPromises.writeFile(
       fileData.localPath, Buffer.from(data, 'base64'),
     );
-    return res.status(201).send(file);
+    return res.status(201).send(newFileOrFolder);
   }
 }
 
