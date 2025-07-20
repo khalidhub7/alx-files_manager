@@ -40,8 +40,8 @@ class UtilsHelper {
 
   static async paginateFiles(parentId, userId, page) {
     let startIndex = 0;
-    if (Number(page) !== 0) {
-      startIndex = (20 * ((Number(page) + 1) - 1)) + 1;
+    if (!Number.isNaN(page) && Number(page) !== 0) {
+      startIndex = 20 * Number(page);
     }
 
     let parent;
