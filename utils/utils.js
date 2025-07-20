@@ -38,7 +38,7 @@ class UtilsHelper {
     return insert;
   }
 
-  static async paginateFiles(parentId, userId, page) {
+  /* static async paginateFiles(parentId, userId, page) {
     let startIndex = 0;
     if (!Number.isNaN(page) && Number(page) !== 0) {
       startIndex = 20 * Number(page);
@@ -55,6 +55,24 @@ class UtilsHelper {
         { $skip: startIndex },
         { $limit: 20 },
       ]).toArray();
+    return files;
+  } */
+
+  static async paginateFiles(parentId, userId, page) {
+    const pageNumber = Number(page) || 0;
+    const startIndex = 20 * pageNumber;
+
+    const parent = Number.isNaN(Number(parentId))
+      ? new ObjectId(parentId)
+      : Number(parentId);
+
+    const files = await dbClient.db.collection('files')
+      .aggregate([
+        { $match: { parentId: parent, userId: new ObjectId(userId) } },
+        { $skip: startIndex },
+        { $limit: 20 },
+      ]).toArray();
+
     return files;
   }
 }
