@@ -44,7 +44,7 @@ class UtilsHelper {
     let parent;
     if (Number(parentId) !== 0) {
       parent = new ObjectId(parentId);
-    } else { parent = parentId; }
+    } else { parent = Number(parentId); }
 
     const files = await dbClient.db.collection('files')
       .aggregate([
