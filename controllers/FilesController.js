@@ -73,6 +73,42 @@ class FilesController {
     );
     return res.status(201).send(newFileOrFolder);
   }
+
+  static async getShow(req, res) {
+    const user = await UtilsHelper.getUserByToken(req);
+    if (!user) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+
+    // find file by _id and userId
+    const fileId = req.params.id;
+    const file = await UtilsHelper.getFileByIdAndUser(fileId, user._id);
+    if (!file) {
+      return res.status(404).send({ error: 'Not found' });
+    }
+    return res.status(200).send(file);
+  }
+
+  static async getIndex(req, res) {
+    const user = await UtilsHelper.getUserByToken(req);
+    if (!user) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+
+    const { parentId, page } = req.params;
+
+    // get user by parent_id
+    if (Number(parentId) !== 0) {
+      // checks if at least one file/folder has this parentId
+      const file = await UtilsHelper.getFileByParentId(parentId);
+      if (file) {
+        // get page
+        const paginate = await UtilsHelper.paginateFiles(parentId, page);
+        return res.status(200).send(paginate);
+      }
+    }
+    return res.status(200).send([]);
+  }
 }
 
 export default FilesController;

@@ -19,8 +19,16 @@ class UtilsHelper {
   }
 
   static async getFileByParentId(parentId) {
+    // find one file by _id
     const file = await dbClient.db.collection('files')
       .findOne({ _id: new ObjectId(parentId) });
+    return file;
+  }
+
+  static async getFileByIdAndUser(fileId, userId) {
+    // find file by _id
+    const file = await dbClient.db.collection('files')
+      .findOne({ _id: new ObjectId(fileId), userId });
     return file;
   }
 
@@ -28,6 +36,18 @@ class UtilsHelper {
     const insert = await dbClient.db.collection('files')
       .insertOne(doc);
     return insert;
+  }
+
+  static async paginateFiles(parentId, page) {
+    const startIndex = 20 * ((page + 1) - 1);
+
+    const files = await dbClient.db.collection('files')
+      .aggregate([
+        { $match: { parentId: new ObjectId(parentId) } },
+        { $limit: startIndex + 20 },
+        { $skip: startIndex },
+      ]).toArray();
+    return files;
   }
 }
 export default UtilsHelper;
