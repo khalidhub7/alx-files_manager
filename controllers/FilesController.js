@@ -80,7 +80,7 @@ class FilesController {
       return res.status(401).send({ error: 'Unauthorized' });
     }
 
-    // find files by _id and userId
+    // find file by _id and userId
     const fileId = req.params.id;
     const file = await UtilsHelper.getFileByIdAndUser(fileId, user._id);
     if (!file) {
@@ -95,19 +95,14 @@ class FilesController {
       return res.status(401).send({ error: 'Unauthorized' });
     }
 
-    const { parentId, page = 0 } = req.params;
+    const { parentId = 0, page = 0 } = req.params;
 
-    // get user by parent_id
-    if (Number(parentId) !== 0) {
-      // checks if at least one file/folder has this parentId
-      const file = await UtilsHelper.getFileByParentId(parentId);
-      if (file) {
-        // get page
-        const paginate = await UtilsHelper.paginateFiles(parentId, page);
-        return res.status(200).send(paginate);
-      }
-    }
-    return res.status(200).send([]);
+    // checks if at least one file/folder has this parentId
+    // const file = await UtilsHelper.getFileByParentId(parentId);
+    const paginate = await UtilsHelper.paginateFiles(
+      parentId, user._id, page,
+    );
+    return res.status(200).send(paginate);
   }
 }
 

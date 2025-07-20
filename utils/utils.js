@@ -38,12 +38,17 @@ class UtilsHelper {
     return insert;
   }
 
-  static async paginateFiles(parentId, page) {
+  static async paginateFiles(parentId, userId, page) {
     const startIndex = 20 * ((page + 1) - 1);
+
+    let parent;
+    if (Number(parentId) !== 0) {
+      parent = new ObjectId(parentId);
+    } else { parent = parentId; }
 
     const files = await dbClient.db.collection('files')
       .aggregate([
-        { $match: { parentId: new ObjectId(parentId) } },
+        { $match: { parentId: parent, userId } },
         { $limit: startIndex + 20 },
         { $skip: startIndex },
       ]).toArray();
