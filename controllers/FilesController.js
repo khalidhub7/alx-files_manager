@@ -98,7 +98,7 @@ class FilesController {
     const { parentId = 0, page = 0 } = req.query;
 
     const paginate = await UtilsHelper.paginateFiles(
-      Number(parentId), user._id, Number(page),
+      parentId, user._id, Number(page),
     );
     return res.send(paginate);
   }
