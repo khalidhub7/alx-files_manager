@@ -49,8 +49,8 @@ class UtilsHelper {
     const files = await dbClient.db.collection('files')
       .aggregate([
         { $match: { parentId: parent, userId } },
-        { $limit: startIndex + 20 },
         { $skip: startIndex },
+        { $limit: 20 },
       ]).toArray();
     return files;
   }

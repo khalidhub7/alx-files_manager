@@ -97,12 +97,10 @@ class FilesController {
 
     const { parentId = 0, page = 0 } = req.params;
 
-    // checks if at least one file/folder has this parentId
-    // const file = await UtilsHelper.getFileByParentId(parentId);
     const paginate = await UtilsHelper.paginateFiles(
       parentId, user._id, page,
     );
-    return res.status(200).send(paginate);
+    return res.send(paginate);
   }
 }
 
