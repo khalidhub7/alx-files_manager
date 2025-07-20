@@ -80,13 +80,13 @@ class FilesController {
       return res.status(401).send({ error: 'Unauthorized' });
     }
 
-    // find file by _id and userId
+    // find files by _id and userId
     const fileId = req.params.id;
-    const file = await UtilsHelper.getFileByIdAndUser(fileId, user._id);
-    if (!file) {
+    const files = await UtilsHelper.getFilesByIdAndUser(fileId, user._id);
+    if (files.length === 0) {
       return res.status(404).send({ error: 'Not found' });
     }
-    return res.status(200).send(file);
+    return res.status(200).send(files);
   }
 
   static async getIndex(req, res) {

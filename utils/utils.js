@@ -25,11 +25,12 @@ class UtilsHelper {
     return file;
   }
 
-  static async getFileByIdAndUser(fileId, userId) {
-    // find file by _id
-    const file = await dbClient.db.collection('files')
-      .findOne({ _id: new ObjectId(fileId), userId });
-    return file;
+  static async getFilesByIdAndUser(fileId, userId) {
+    // find files by _id and userId
+    const files = await dbClient.db.collection('files')
+      .find({ _id: new ObjectId(fileId), userId })
+      .toArray();
+    return files;
   }
 
   static async insertFileDoc(doc) {
