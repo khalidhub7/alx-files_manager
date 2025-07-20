@@ -42,7 +42,7 @@ class UtilsHelper {
     const startIndex = 20 * ((page + 1) - 1);
 
     let parent;
-    if (Number(parentId) !== 0) {
+    if (Number.isNaN(Number(parentId))) {
       parent = new ObjectId(parentId);
     } else { parent = Number(parentId); }
 
