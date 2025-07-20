@@ -82,11 +82,11 @@ class FilesController {
 
     // find file by _id and userId
     const fileId = req.params.id;
-    const file = await UtilsHelper.getFileByIdAndUser(fileId, user._id);
-    if (!file) {
-      return res.status(404).send({ error: 'Not found' });
+    if (fileId) {
+      const file = await UtilsHelper.getFileByIdAndUser(fileId, user._id);
+      if (file) { return res.status(200).send(file); }
     }
-    return res.status(200).send(file);
+    return res.status(404).send({ error: 'Not found' });
   }
 
   static async getIndex(req, res) {

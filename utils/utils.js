@@ -38,32 +38,13 @@ class UtilsHelper {
     return insert;
   }
 
-  /* static async paginateFiles(parentId, userId, page) {
+  static async paginateFiles(parentId, userId, page) {
     const startIndex = 20 * ((page + 1) - 1);
 
     let parent;
     if (Number.isNaN(Number(parentId))) {
       parent = new ObjectId(parentId);
     } else { parent = Number(parentId); }
-
-    const files = await dbClient.db.collection('files')
-      .aggregate([
-        { $match: { parentId: parent, userId } },
-        { $skip: startIndex },
-        { $limit: 20 },
-      ]).toArray();
-    return files;
-  } */
-
-  static async paginateFiles(parentId, userId, page) {
-    const startIndex = 20 * page;
-
-    let parent;
-    if (Number.isNaN(Number(parentId))) {
-      parent = new ObjectId(parentId);
-    } else {
-      parent = Number(parentId);
-    }
 
     const files = await dbClient.db.collection('files')
       .aggregate([
