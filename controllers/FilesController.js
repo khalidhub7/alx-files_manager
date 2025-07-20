@@ -95,9 +95,7 @@ class FilesController {
       return res.status(401).send({ error: 'Unauthorized' });
     }
 
-    // const { parentId = 0, page = 0 } = req.query;
-    const parentId = req.query.parentId || 0;
-    const page = parseInt(req.query.page, 10) || 0;
+    const { parentId = 0, page = 0 } = req.query;
     const paginate = await UtilsHelper.paginateFiles(
       parentId, user._id, page,
     );
