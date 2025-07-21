@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import { promises as fsPromises } from 'fs';
-import { ObjectId } from 'mongodb';
 import UtilsHelper from '../utils/utils';
 
 class FilesController {
@@ -12,7 +11,7 @@ class FilesController {
 
     // get file info from request body
     const {
-      name, type, parentId = 0, isPublic = false, data,
+      name, type, parentId = '0', isPublic = false, data,
     } = req.body;
 
     // validate input & parent folder
@@ -27,8 +26,7 @@ class FilesController {
       return res.status(400).send({ error: 'Missing data' });
     }
     if (Number(parentId) !== 0) {
-      const parentFolderDoc = await UtilsHelper
-        .getFileByParentId(parentId);
+      const parentFolderDoc = await UtilsHelper.getFileByParentId(parentId);
       if (!parentFolderDoc) {
         return res.status(400).send({ error: 'Parent not found' });
       }
@@ -124,22 +122,18 @@ class FilesController {
     const { fileId } = req.params;
 
     // search file by user_id and file_id
-    const file = await UtilsHelper
-      .getFileByIdAndUser(fileId, user._id);
-    if (!file) {
+    const userId = UtilsHelper.getValidId(user._id);
+    const _id = UtilsHelper.getValidId(fileId);
+    const update = await UtilsHelper.findAndUpdateFile(
+      { userId, _id },
+      { isPublic: true },
+      { returnOriginal: false },
+    );
+
+    if (!update) {
       return res.status(404).send({ error: 'Not found' });
     }
-
-    const update = await UtilsHelper.updateFileDoc(
-      { userId: user._id, _id: new ObjectId(fileId) },
-      { isPublic: true },
-    );
-    return res.send({
-      id: update._id.toString(),
-      name: update.name,
-      type: update.type,
-      parentId: update.parentId,
-    });
+    return res.send({ update });
   }
 
   static async putUnpublish(req, res) {
@@ -150,15 +144,18 @@ class FilesController {
     const { fileId } = req.params;
 
     // search file by user_id and file_id
-    const file = await UtilsHelper
-      .getFileByIdAndUser(fileId, user._id);
-    if (!file) {
+    const userId = UtilsHelper.getValidId(user._id);
+    const _id = UtilsHelper.getValidId(fileId);
+    const update = await UtilsHelper.findAndUpdateFile(
+      { userId, _id },
+      { isPublic: true },
+      { returnOriginal: false },
+    );
+
+    if (!update) {
       return res.status(404).send({ error: 'Not found' });
     }
-    const update = await UtilsHelper.updateFileDoc(
-      { userId: user._id, _id: new ObjectId(fileId) },
-      { isPublic: false },
-    );
+
     return res.send({
       id: update._id.toString(),
       name: update.name,
