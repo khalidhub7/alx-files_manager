@@ -1,5 +1,6 @@
-import { promises as fsPromises } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { promises as fsPromises } from 'fs';
+import { ObjectId } from 'mongodb';
 import UtilsHelper from '../utils/utils';
 
 class FilesController {
@@ -26,12 +27,14 @@ class FilesController {
       return res.status(400).send({ error: 'Missing data' });
     }
     if (Number(parentId) !== 0) {
-      const parentFolderDoc = await UtilsHelper.getFileByParentId(parentId);
+      const parentFolderDoc = await UtilsHelper
+        .getFileByParentId(parentId);
       if (!parentFolderDoc) {
         return res.status(400).send({ error: 'Parent not found' });
       }
       if (parentFolderDoc.type !== 'folder') {
-        return res.status(400).send({ error: 'Parent is not a folder' });
+        return res.status(400)
+          .send({ error: 'Parent is not a folder' });
       }
     }
 
@@ -83,7 +86,8 @@ class FilesController {
     // find file by _id and userId
     const fileId = req.params.id;
     if (fileId) {
-      const file = await UtilsHelper.getFileByIdAndUser(fileId, user._id);
+      const file = await UtilsHelper
+        .getFileByIdAndUser(fileId, user._id);
       if (file) { return res.status(200).send(file); }
     }
     return res.status(404).send({ error: 'Not found' });
@@ -110,6 +114,46 @@ class FilesController {
         parentId: file.parentId,
       })),
     );
+  }
+
+  static async putPublish(req, res) {
+    const user = await UtilsHelper.getUserByToken(req);
+    if (!user) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+    const { fileId } = req.params;
+
+    // search file by user_id and file_id
+    const file = await UtilsHelper
+      .getFileByIdAndUser(user._id, fileId);
+    if (!file) {
+      return res.status(404).send({ error: 'Not found' });
+    }
+    const update = await UtilsHelper.updateFileDoc(
+      { userId: user._id, _id: new ObjectId(fileId) },
+      { isPublic: true },
+    );
+    return res.status(200).send(update);
+  }
+
+  static async putUnpublish(req, res) {
+    const user = await UtilsHelper.getUserByToken(req);
+    if (!user) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+    const { fileId } = req.params;
+
+    // search file by user_id and file_id
+    const file = await UtilsHelper
+      .getFileByIdAndUser(user._id, fileId);
+    if (!file) {
+      return res.status(404).send({ error: 'Not found' });
+    }
+    const update = await UtilsHelper.updateFileDoc(
+      { userId: user._id, _id: new ObjectId(fileId) },
+      { isPublic: false },
+    );
+    return res.status(200).send(update);
   }
 }
 

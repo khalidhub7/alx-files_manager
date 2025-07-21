@@ -54,5 +54,13 @@ class UtilsHelper {
       ]).toArray();
     return files;
   }
+
+  static async updateFileDoc(where, obj) {
+    const update = await dbClient.db.collection('files')
+      .findOneAndUpdate(
+        where, { $set: obj }, { returnOriginal: false },
+      );
+    return update.value;
+  }
 }
 export default UtilsHelper;
