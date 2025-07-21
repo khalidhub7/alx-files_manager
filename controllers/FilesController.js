@@ -129,6 +129,11 @@ class FilesController {
     if (!file) {
       return res.status(404).send({ error: 'Not found' });
     }
+    // no need update
+    if (file.isPublic === true) {
+      return res.send(file);
+    }
+    // need update
     const update = await UtilsHelper.updateFileDoc(
       { userId: user._id, _id: new ObjectId(fileId) },
       { isPublic: true },
