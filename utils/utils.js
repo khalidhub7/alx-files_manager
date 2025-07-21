@@ -39,18 +39,20 @@ class UtilsHelper {
   }
 
   static async paginateFiles(parentId, userId, page) {
+    let query;
     const startIndex = 20 * Number(page);
 
     let parent = parentId;
     if (ObjectId.isValid(parentId)) {
       parent = new ObjectId(parentId);
     }
+    if (parentId) {
+      query = { parentId: parent, userId };
+    } else { query = { userId }; }
 
     const files = await dbClient.db.collection('files')
       .aggregate([
-        { $match: { parentId: parent, userId } },
-        { $skip: startIndex },
-        { $limit: 20 },
+        { $match: query }, { $skip: startIndex }, { $limit: 20 },
       ]).toArray();
     return files;
   }
