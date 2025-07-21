@@ -11,9 +11,9 @@ class UtilsHelper {
       id = arg;
     } else if (ObjectId.isValid(arg)) {
       id = new ObjectId(arg);
-    } else if (Number(arg) === 0) {
-      id = '0';
-    } else { throw new Error('invalid id'); }
+    } else {
+      id = 0;
+    }
     return id;
   }
 
