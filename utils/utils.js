@@ -39,14 +39,12 @@ class UtilsHelper {
   }
 
   static async paginateFiles(parentId, userId, page) {
-    const pagee = Number(page) || 0;
-    const startIndex = 20 * pagee;
+    const startIndex = 20 * Number(page);
 
-    let parent;
-    if (Number.isNaN(Number(parentId))) {
-      // if parentId is string like uuid
+    let parent = parentId;
+    if (ObjectId.isValid(parentId)) {
       parent = new ObjectId(parentId);
-    } else { parent = `${parentId}`; } // if parentId is int like 0 root
+    }
 
     const files = await dbClient.db.collection('files')
       .aggregate([
