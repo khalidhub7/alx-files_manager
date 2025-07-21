@@ -100,6 +100,8 @@ class FilesController {
       parentId, user._id, page,
     );
     /* return res.send(paginate); */
+    // return id instead of _id
+    // this fucking error took 2 days to fix
     return res.send(
       paginate.map((file) => ({
         id: file._id.toString(),

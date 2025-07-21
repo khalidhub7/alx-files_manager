@@ -42,6 +42,7 @@ class UtilsHelper {
     const startIndex = 20 * Number(page);
 
     let parent = parentId;
+    // Convert valid parentId to ObjectId
     if (ObjectId.isValid(parentId)) {
       parent = new ObjectId(parentId);
     }
@@ -49,8 +50,7 @@ class UtilsHelper {
     const files = await dbClient.db.collection('files')
       .aggregate([
         { $match: { parentId: parent, userId } },
-        { $skip: startIndex },
-        { $limit: 20 },
+        { $skip: startIndex }, { $limit: 20 },
       ]).toArray();
     return files;
   }
