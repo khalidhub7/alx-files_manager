@@ -38,16 +38,15 @@ class UtilsHelper {
     return insert;
   }
 
-  /* static async paginateFiles(parentId, userId, page) {
-    let startIndex = 0;
-    if (!Number.isNaN(page) && Number(page) !== 0) {
-      startIndex = 20 * Number(page);
-    }
+  static async paginateFiles(parentId, userId, page) {
+    const pagee = Number(page) || 0;
+    const startIndex = 20 * pagee;
 
     let parent;
     if (Number.isNaN(Number(parentId))) {
+      // if parentId is string like uuid
       parent = new ObjectId(parentId);
-    } else { parent = Number(parentId); }
+    } else { parent = `${parentId}`; } // if parentId is int like 0 root
 
     const files = await dbClient.db.collection('files')
       .aggregate([
@@ -55,24 +54,6 @@ class UtilsHelper {
         { $skip: startIndex },
         { $limit: 20 },
       ]).toArray();
-    return files;
-  } */
-
-  static async paginateFiles(parentId, userId, page) {
-    const pageNumber = Number(page) || 0;
-    const startIndex = 20 * pageNumber;
-
-    const parent = Number.isNaN(Number(parentId))
-      ? new ObjectId(parentId)
-      : Number(parentId);
-
-    const files = await dbClient.db.collection('files')
-      .aggregate([
-        { $match: { parentId: parent, userId: new ObjectId(userId) } },
-        { $skip: startIndex },
-        { $limit: 20 },
-      ]).toArray();
-
     return files;
   }
 }
