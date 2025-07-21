@@ -125,27 +125,21 @@ class FilesController {
 
     // search file by user_id and file_id
     const file = await UtilsHelper
-      .getFileByIdAndUser(user._id, fileId);
+      .getFileByIdAndUser(fileId, user._id);
     if (!file) {
       return res.status(404).send({ error: 'Not found' });
     }
-    // no need update
-    if (file.isPublic === true) {
-      return res.send(file);
-    }
-    // need update
+
     const update = await UtilsHelper.updateFileDoc(
       { userId: user._id, _id: new ObjectId(fileId) },
       { isPublic: true },
     );
-    return res.send(
-      update.map((file) => ({
-        id: file._id.toString(),
-        name: file.name,
-        type: file.type,
-        parentId: file.parentId,
-      })),
-    );
+    return res.send({
+      id: update._id.toString(),
+      name: update.name,
+      type: update.type,
+      parentId: update.parentId,
+    });
   }
 
   static async putUnpublish(req, res) {
@@ -157,7 +151,7 @@ class FilesController {
 
     // search file by user_id and file_id
     const file = await UtilsHelper
-      .getFileByIdAndUser(user._id, fileId);
+      .getFileByIdAndUser(fileId, user._id);
     if (!file) {
       return res.status(404).send({ error: 'Not found' });
     }
@@ -165,14 +159,12 @@ class FilesController {
       { userId: user._id, _id: new ObjectId(fileId) },
       { isPublic: false },
     );
-    return res.send(
-      update.map((file) => ({
-        id: file._id.toString(),
-        name: file.name,
-        type: file.type,
-        parentId: file.parentId,
-      })),
-    );
+    return res.send({
+      id: update._id.toString(),
+      name: update.name,
+      type: update.type,
+      parentId: update.parentId,
+    });
   }
 }
 
