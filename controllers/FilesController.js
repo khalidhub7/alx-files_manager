@@ -51,6 +51,10 @@ class FilesController {
       // console.log(`***  ${JSON.stringify(newFileOrFolder)}  ***`);
       const { _id, ...rest } = newFileOrFolder;
       const updatedFolder = { id: _id, ...rest };
+      // checker is case sensitive so '0' to 0
+      if (Number(updatedFolder.parentId) === 0) {
+        updatedFolder.parentId = 0;
+      }
       return res.status(201).send(updatedFolder);
     }
 
@@ -72,6 +76,10 @@ class FilesController {
     await fsPromises.writeFile(
       fileData.localPath, Buffer.from(data, 'base64'),
     );
+    // checker is case sensitive so '0' to 0
+    if (Number(newFileOrFolder.parentId) === 0) {
+      newFileOrFolder.parentId = 0;
+    }
     return res.status(201).send(newFileOrFolder);
   }
 
