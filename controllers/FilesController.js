@@ -133,7 +133,14 @@ class FilesController {
       { userId: user._id, _id: new ObjectId(fileId) },
       { isPublic: true },
     );
-    return res.status(200).send(update);
+    return res.send(
+      update.map((file) => ({
+        id: file._id.toString(),
+        name: file.name,
+        type: file.type,
+        parentId: file.parentId,
+      })),
+    );
   }
 
   static async putUnpublish(req, res) {
@@ -153,7 +160,14 @@ class FilesController {
       { userId: user._id, _id: new ObjectId(fileId) },
       { isPublic: false },
     );
-    return res.status(200).send(update);
+    return res.send(
+      update.map((file) => ({
+        id: file._id.toString(),
+        name: file.name,
+        type: file.type,
+        parentId: file.parentId,
+      })),
+    );
   }
 }
 
