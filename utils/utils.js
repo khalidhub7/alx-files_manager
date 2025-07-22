@@ -79,6 +79,7 @@ class UtilsHelper {
         { $set: obj }, // update
         options, // option: return updated doc
       );
+    console.log(`*** ${JSON.stringify(result)} ***`);
     return result.value;
   }
 }

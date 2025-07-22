@@ -123,40 +123,26 @@ class FilesController {
   }
 
   static async putPublish(req, res) {
-    const user = await UtilsHelper.getUserByToken(req);
-    if (!user) {
-      return res.status(401).send({ error: 'Unauthorized' });
-    }
-    const { fileId } = req.params;
-
-    // search file by user_id and file_id
-    const userId = UtilsHelper.getValidId(user._id);
-    const _id = UtilsHelper.getValidId(fileId);
-    const update = await UtilsHelper.findAndUpdateFile(
-      { userId, _id },
-      { isPublic: true },
-      { returnOriginal: false },
-    );
-
-    if (!update) {
-      return res.status(404).send({ error: 'Not found' });
-    }
-    return res.send({ update });
+    await FilesController.togglePublicStatus(req, res, true);
   }
 
   static async putUnpublish(req, res) {
+    await FilesController.togglePublicStatus(req, res, false);
+  }
+
+  static async togglePublicStatus(req, res, status) {
     const user = await UtilsHelper.getUserByToken(req);
     if (!user) {
       return res.status(401).send({ error: 'Unauthorized' });
     }
-    const { fileId } = req.params;
-
+    const { id } = req.params;
+    const fileId = id;
     // search file by user_id and file_id
     const userId = UtilsHelper.getValidId(user._id);
     const _id = UtilsHelper.getValidId(fileId);
     const update = await UtilsHelper.findAndUpdateFile(
       { userId, _id },
-      { isPublic: true },
+      { isPublic: status },
       { returnOriginal: false },
     );
 
@@ -166,8 +152,10 @@ class FilesController {
 
     return res.send({
       id: update._id.toString(),
+      userId: update.userId.toString(),
       name: update.name,
       type: update.type,
+      isPublic: update.isPublic,
       parentId: update.parentId,
     });
   }
