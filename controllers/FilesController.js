@@ -171,9 +171,8 @@ class FilesController {
     const file = await UtilsHelper.getFileById(fileId);
     const user = await UtilsHelper.getUserByToken(req);
 
-    if (
-      !file || !user || !file.localPath
-      || (file.isPublic === false && file.userId !== user._id)
+    if (!file || !file.localPath
+      || (!user && !file.isPublic)
     ) {
       return res.status(404).send({ error: 'Not found' });
     }
@@ -185,10 +184,7 @@ class FilesController {
 
     // else return file
     const mimeType = mime.lookup(file.localPath);
-    const base64 = await fsPromises.readFile(
-      `${file.localPath}`, 'utf-8',
-    );
-    const buffer = Buffer.from(base64, 'base64');
+    const buffer = await fsPromises.readFile(file.localPath);
     res.setHeader('Content-Type', mimeType);
     return res.send(buffer);
   }
