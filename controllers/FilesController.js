@@ -171,9 +171,15 @@ class FilesController {
     const file = await UtilsHelper.getFileById(fileId);
     const user = await UtilsHelper.getUserByToken(req);
 
-    if (!file || !file.localPath
-      || (!user && !file.isPublic)
-    ) {
+    if (!file || !file.localPath) {
+      return res.status(404).send({ error: 'Not found' });
+    }
+    if (user && !fileId.isPublic) {
+      if (file.userID !== user._id) {
+        return res.status(404).send({ error: 'Not found' });
+      }
+    }
+    if (!user && !file.isPublic) {
       return res.status(404).send({ error: 'Not found' });
     }
 
