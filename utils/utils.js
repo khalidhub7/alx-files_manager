@@ -12,7 +12,7 @@ class UtilsHelper {
     } else if (ObjectId.isValid(arg)) {
       id = new ObjectId(arg);
     } else if (Number(arg) === 0) {
-      id = 0;
+      id = '0';
     } else { id = undefined; }
     return id;
   }
@@ -33,14 +33,14 @@ class UtilsHelper {
     return user;
   }
 
-  // find one file by _id
-  static async getFileByParentId(parentId) {
+  // find a file by its parent folder's id
+  static async getFileById(parentId) {
     const file = await dbClient.db.collection('files')
       .findOne({ _id: this.getValidId(parentId) });
     return file;
   }
 
-  // find file by _id and userId
+  // find a file by its id and owner's user id
   static async getFileByIdAndUser(fileId, userId) {
     const file = await dbClient.db.collection('files')
       .findOne(
@@ -49,13 +49,14 @@ class UtilsHelper {
     return file;
   }
 
-  // insert one file
+  // insert a new file document
   static async insertFileDoc(doc) {
     const insert = await dbClient.db.collection('files')
       .insertOne(doc);
     return insert;
   }
 
+  // get paginated files by parent id and user id
   static async paginateFiles(parentId, userId, page) {
     const startIndex = 20 * Number(page);
     const files = await dbClient.db.collection('files')
@@ -72,6 +73,7 @@ class UtilsHelper {
     return files;
   }
 
+  // find a file and update its fields
   static async findAndUpdateFile(where, obj, options) {
     const result = await dbClient.db.collection('files')
       .findOneAndUpdate(
@@ -79,7 +81,6 @@ class UtilsHelper {
         { $set: obj }, // update
         options, // option: return updated doc
       );
-    console.log(`*** ${JSON.stringify(result)} ***`);
     return result.value;
   }
 }

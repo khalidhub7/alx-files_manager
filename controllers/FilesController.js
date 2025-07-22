@@ -26,13 +26,12 @@ class FilesController {
       return res.status(400).send({ error: 'Missing data' });
     }
     if (Number(parentId) !== 0) {
-      const parentFolderDoc = await UtilsHelper.getFileByParentId(parentId);
+      const parentFolderDoc = await UtilsHelper.getFileById(parentId);
       if (!parentFolderDoc) {
         return res.status(400).send({ error: 'Parent not found' });
       }
       if (parentFolderDoc.type !== 'folder') {
-        return res.status(400)
-          .send({ error: 'Parent is not a folder' });
+        return res.status(400).send({ error: 'Parent is not a folder' });
       }
     }
 
@@ -150,14 +149,16 @@ class FilesController {
       return res.status(404).send({ error: 'Not found' });
     }
 
-    return res.send({
+    /* return res.send({
       id: update._id.toString(),
       userId: update.userId.toString(),
       name: update.name,
       type: update.type,
       isPublic: update.isPublic,
       parentId: update.parentId,
-    });
+    }); */
+
+    return res.send(update);
   }
 }
 
