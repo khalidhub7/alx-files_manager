@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { promises as fsPromises } from 'fs';
+import { Buffer } from 'buffer';
+import mime from 'mime-types';
 import UtilsHelper from '../utils/utils';
 
 class FilesController {
@@ -159,6 +161,36 @@ class FilesController {
     }); */
 
     return res.send(update);
+  }
+
+  // return file data if public or user has access
+  static async getFile(req, res) {
+    const { id } = req.params;
+    const fileId = id;
+
+    const file = await UtilsHelper.getFileById(fileId);
+    const user = await UtilsHelper.getUserByToken(req);
+
+    if (
+      !file || !user || !file.localPath
+      || (file.isPublic === false && file.userId !== user._id)
+    ) {
+      return res.status(404).send({ error: 'Not found' });
+    }
+
+    if (file.type === 'folder') {
+      return res.status(400)
+        .send({ error: "A folder doesn't have content" });
+    }
+
+    // else return file
+    const mimeType = mime.lookup(file.localPath);
+    const base64 = await fsPromises.readFile(
+      `${file.localPath}`, 'utf-8',
+    );
+    const buffer = Buffer.from(base64, 'base64');
+    res.setHeader('Content-Type', mimeType);
+    return res.send(buffer);
   }
 }
 
