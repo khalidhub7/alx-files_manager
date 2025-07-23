@@ -171,28 +171,32 @@ class FilesController {
     const file = await UtilsHelper.getFileById(fileId);
     const user = await UtilsHelper.getUserByToken(req);
 
+    if (file && file.type === 'folder') {
+      return res.status(400)
+        .send({ error: "A folder doesn't have content" });
+    }
+
     if (!file || !file.localPath) {
       return res.status(404).send({ error: 'Not found' });
     }
-    if (user && !file.isPublic) {
-      if (file.userId !== user._id) {
-        return res.status(404).send({ error: 'Not found' });
-      }
-    }
-    if (!user && !file.isPublic) {
+    if (!user && file.isPublic) {
       return res.status(404).send({ error: 'Not found' });
     }
-
-    if (file.type === 'folder') {
-      return res.status(400)
-        .send({ error: "A folder doesn't have content" });
+    if (user) {
+      const userId = file.userId.toString();
+      const fileId = user._id.toString();
+      if (file.isPublic === false) {
+        if (userId !== fileId) {
+          return res.status(404).send({ error: 'Not found' });
+        }
+      }
     }
 
     // else return file
     const mimeType = mime.lookup(file.localPath);
     const buffer = await fsPromises.readFile(file.localPath);
     res.setHeader('Content-Type', mimeType);
-    return res.send(buffer);
+    return res.end(buffer);
   }
 }
 
