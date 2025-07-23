@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 
-const host = process.env.DB_HOST || 'localhost';
 const port = process.env.DB_PORT || '27017';
+const host = process.env.DB_HOST || 'localhost';
 const database = process.env.DB_DATABASE || 'files_manager';
 
 class DBClient {
@@ -12,15 +12,16 @@ class DBClient {
 
   connect() {
     // return promise to track connection
-    const client = new MongoClient(`mongodb://${host}:${port}`, {
-      useUnifiedTopology: true,
-    });
+    const client = new MongoClient(
+      `mongodb://${host}:${port}`, { useUnifiedTopology: true },
+    );
     return client.connect()
       .then(() => {
         this.db = client.db(database);
         this._isalive = true;
       })
       .catch((err) => {
+        this._isalive = false;
         console.log(`mongo connection failed: ${err.message}`);
       });
   }
