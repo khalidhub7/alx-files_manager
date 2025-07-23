@@ -166,35 +166,33 @@ class FilesController {
   // return file data if public or user has access
   static async getFile(req, res) {
     const { id } = req.params;
-    const fileId = id;
-
-    const file = await UtilsHelper.getFileById(fileId);
+    const file = await UtilsHelper.getFileById(id);
     const user = await UtilsHelper.getUserByToken(req);
 
-    if (file && file.type === 'folder') {
-      return res.status(400)
-        .send({ error: "A folder doesn't have content" });
-    }
-
-    if (!file || !file.localPath) {
+    if (!file) {
       return res.status(404).send({ error: 'Not found' });
     }
-    if (!user && file.isPublic) {
-      return res.status(404).send({ error: 'Not found' });
-    }
-    if (user) {
-      const userId = file.userId.toString();
-      const fileId = user._id.toString();
-      if (file.isPublic === false) {
-        if (userId !== fileId) {
-          return res.status(404).send({ error: 'Not found' });
-        }
+    if (file.isPublic === false) {
+      if (!user || !(user._id.toString() === file.userId.toString())) {
+        return res.status(404).send({ error: 'Not found' });
       }
+    }
+    if (file.type === 'folder') {
+      return res.status(400).send({ error: "A folder doesn't have content" });
+    }
+    if (!file.localPath) {
+      console.log('here');
+      return res.status(404).send({ error: 'Not found' });
     }
 
     // else return file
     const mimeType = mime.lookup(file.localPath);
-    const buffer = await fsPromises.readFile(file.localPath);
+    let buffer;
+    try {
+      buffer = await fsPromises.readFile(file.localPath);
+    } catch (error) {
+      return res.status(404).send({ error: 'Not found' });
+    }
     res.setHeader('Content-Type', mimeType);
     return res.end(buffer);
   }
