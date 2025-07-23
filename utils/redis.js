@@ -5,17 +5,17 @@ class RedisClient {
   constructor() {
     this.client = redis.createClient();
     this.client.on('error', (err) => {
-      console.log(
-        `redis connect failed: ${err.message}`,
-      );
+      console.log(`redis connect failed: ${err.message}`);
     });
   }
 
   isAlive() {
-    /* const asyncping = promisify(this.client.ping)
+    /*
+     const asyncping = promisify(this.client.ping)
       .bind(this.client);
     return asyncping()
-      .then((resp) => resp === 'PONG'); */
+      .then((resp) => resp === 'PONG');
+      */
     return this.client.connected;
   }
 
