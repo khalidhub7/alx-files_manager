@@ -22,7 +22,7 @@ class UsersController {
 
     const pwd = sha1(password);
     const insert = await dbClient.db.collection('users')
-      .insertOne({ email, pwd });
+      .insertOne({ email, password: pwd });
 
     if (insert.result.ok === 1) {
       const id = insert.insertedId;
