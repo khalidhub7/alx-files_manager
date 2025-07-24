@@ -54,7 +54,7 @@ class FilesController {
 
         const { _id, ...rest } = newFileOrFolder;
         const updatedFolder = { id: _id, ...rest };
-        console.log('_> folder created in db');
+        console.log('_> folder created successfully');
         return res.status(201).send(updatedFolder);
       } catch (err) {
         console.log('_> folder creation failed', err.message);
@@ -83,7 +83,7 @@ class FilesController {
         console.log('_> file saved successfully');
         return res.status(201).send(newFileOrFolder);
       } catch (err) {
-        console.log('_> file save failed:', err.message);
+        console.log('_> file/image creation failed:', err.message);
       }
     }
     return undefined;
