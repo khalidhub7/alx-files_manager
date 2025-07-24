@@ -7,8 +7,8 @@ class AuthController {
   static async getConnect(req, res) {
     // this func expects a header
     // like authorization: Basic <base64>
-    let authenticated = false;
     let user;
+    let authenticated = false;
 
     const header = req.headers.authorization;
     if (header) {
@@ -24,8 +24,7 @@ class AuthController {
         if (user.password === hashpwd) { authenticated = true; }
       }
     }
-    // previously here i handled email/password from body
-    // and set authorization header
+
     if (authenticated) {
       const token = uuidv4();
       const key = `auth_${token}`;
@@ -33,6 +32,7 @@ class AuthController {
 
       await redisClient.set(key, userID, 86400);
       res.status(200).send({ token });
+      // return token to client — used in 'x-token' header for auth later
     } else { res.status(401).send({ error: 'Unauthorized' }); }
   }
 
