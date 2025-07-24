@@ -32,39 +32,20 @@ curl -X POST http://0.0.0.0:5000/files \
   -H "content-type: application/json" \
   -d '{ "name": "images", "type": "folder" }' && echo ""
 
+# get file details by file id (must belong to the user)
+curl -X GET 0.0.0.0:5000/files/5f1e8896c7ba06511e683b25 \
+  -H "x-token: f21fb953-16f9-46ed-8d9c-84c6450ec80f" && echo ""
+
+# get first 20 files (default page = 0)
+curl -X GET 0.0.0.0:5000/files \
+  -H "x-token: f21fb953-16f9-46ed-8d9c-84c6450ec80f" && echo ""
+
+# get files under specific folder (parentId), first 20 results (default page = 0)
+curl -X GET "0.0.0.0:5000/files?parentId=5f1e881cc7ba06511e683b23" \
+  -H "x-token: f21fb953-16f9-46ed-8d9c-84c6450ec80f" && echo ""
+
+
+
+
 # current x-token
 a5422410-e28e-4ed1-9799-6de1bcc05db6
-
-
-
-# for file
-# saved to db:
-{
-  "_id": ObjectId("6881b351c2371e129814450e"),
-  "userId": ObjectId("6881863ea1d8275a6a3b58c4"),
-  "name": "myText.txt", "type": "file", "isPublic": false, "parentId": 0,
-  "localPath": "/tmp/files_manager/a499e837-...c8401"
-}
-# api response:
-{
-  "id": "6881b351c2371e129814450e",
-  "userId": "6881863ea1d8275a6a3b58c4",
-  "name": "myText.txt", "type": "file", "isPublic": false, "parentId": 0
-}
-
-
-# for folder
-# saved to db:
-{
-  "_id": ObjectId("6881b358c2371e129814450f"),
-  "userId": ObjectId("6881863ea1d8275a6a3b58c4"),
-  "name": "images", "type": "folder", "isPublic": false, "parentId": 0
-}
-
-# api response:
-{
-  "id": "6881b358c2371e129814450f",
-  "userId": "6881863ea1d8275a6a3b58c4",
-  "name": "images", "type": "folder", "isPublic": false, "parentId": 0
-}
-
