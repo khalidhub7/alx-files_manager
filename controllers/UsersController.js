@@ -6,8 +6,7 @@ import redisClient from '../utils/redis';
 class UsersController {
   static async postNew(req, res) {
     let errMsg = '';
-    const { email } = req.body;
-    let { password } = req.body;
+    const { email = '', password = '' } = req.body;
 
     if (!password) { errMsg = 'Missing password'; }
     if (!email) { errMsg = 'Missing email'; }
@@ -20,9 +19,10 @@ class UsersController {
       errMsg = 'Already exist';
       return res.status(400).send({ error: errMsg });
     }
-    password = sha1(password);
+
+    const pwd = sha1(password);
     const insert = await dbClient.db.collection('users')
-      .insertOne({ email, password });
+      .insertOne({ email, pwd });
 
     if (insert.result.ok === 1) {
       const id = insert.insertedId;
