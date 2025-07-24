@@ -182,15 +182,19 @@ class FilesController {
     }
 
     // else return file
-    const mimeType = mime.lookup(file.localPath);
+    let mimeType;
     let buffer;
     try {
+      console.log('_> getting file data');
+      mimeType = mime.lookup(file.localPath);
       buffer = await fsPromises.readFile(file.localPath);
-    } catch (error) {
+      res.setHeader('Content-Type', mimeType);
+      console.log('_> file data got successfully');
+      return res.end(buffer);
+    } catch (err) {
+      console.error('_> failed to get file data', err.message);
       return res.status(404).send({ error: 'Not found' });
     }
-    res.setHeader('Content-Type', mimeType);
-    return res.end(buffer);
   }
 }
 
