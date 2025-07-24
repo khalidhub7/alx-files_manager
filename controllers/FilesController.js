@@ -118,14 +118,12 @@ class FilesController {
     // return id instead of _id
     // this fucking error took 2 days to fix
 
-    return res.send(
-      paginate.map((file) => ({
-        id: file._id,
-        name: file.name,
-        type: file.type,
-        parentId: file.parentId,
-      })),
-    );
+    return res.send(paginate.map((file) => ({
+      id: file._id,
+      name: file.name,
+      type: file.type,
+      parentId: file.parentId,
+    })));
   }
 
   static async putPublish(req, res) {
@@ -189,6 +187,7 @@ class FilesController {
       mimeType = mime.lookup(file.localPath);
       buffer = await fsPromises.readFile(file.localPath);
       res.setHeader('Content-Type', mimeType);
+
       console.log('_> file data got successfully');
       return res.end(buffer);
     } catch (err) {
