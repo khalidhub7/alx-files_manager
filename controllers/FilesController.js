@@ -13,7 +13,7 @@ class FilesController {
 
     // get file info from request body
     const {
-      name, type, parentId = '0', isPublic = false, data = undefined,
+      name, type, parentId = 0, isPublic = false, data = undefined,
     } = req.body;
 
     // validate input & parent folder
