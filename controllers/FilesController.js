@@ -156,15 +156,6 @@ class FilesController {
       return res.status(404).send({ error: 'Not found' });
     }
 
-    /* return res.send({
-      id: update._id.toString(),
-      userId: update.userId.toString(),
-      name: update.name,
-      type: update.type,
-      isPublic: update.isPublic,
-      parentId: update.parentId,
-    }); */
-
     return res.send(update);
   }
 
