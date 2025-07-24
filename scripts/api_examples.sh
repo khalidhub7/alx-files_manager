@@ -36,7 +36,10 @@ curl -X POST http://0.0.0.0:5000/files \
 curl -X GET http://0.0.0.0:5000/files/5f1e8896c7ba06511e683b25 \
   -H "x-token: f21fb953-16f9-46ed-8d9c-84c6450ec80f" && echo ""
 
-# get first 20 files (page 0 by default)
+# parentId and page are not specified, so:
+# → parentId = 0 (means root folder)
+# → page = 0 (first 20 matching files)
+# get first 20 root-level files (page = 0, parentId = 0 by default)
 curl -X GET http://0.0.0.0:5000/files \
   -H "x-token: f21fb953-16f9-46ed-8d9c-84c6450ec80f" && echo ""
 

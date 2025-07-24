@@ -10,7 +10,7 @@ chmod 644 package.json # make it writable again
 sudo mkdir -p ./data/db
 sudo chmod -R 755 ./data/db
 # use this
-sudo mongod --dbpath ./data/db/ &
+sudo mongod --dbpath ./data/db/
 
 npm run start-server
 npm run test main.test.js
