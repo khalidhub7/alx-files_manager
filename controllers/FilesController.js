@@ -42,7 +42,7 @@ class FilesController {
 
     // shared metadata for both files and folders
     let newFileOrFolder = {
-      userId: userID, name, type, isPublic, parentId: Number(parentId),
+      userId: userID, name, type, isPublic, parentId,
     };
 
     // handle folder creation
