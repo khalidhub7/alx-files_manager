@@ -1,7 +1,7 @@
+import mime from 'mime-types';
+import { Buffer } from 'buffer';
 import { v4 as uuidv4 } from 'uuid';
 import { promises as fsPromises } from 'fs';
-import { Buffer } from 'buffer';
-import mime from 'mime-types';
 import UtilsHelper from '../utils/utils';
 
 class FilesController {
@@ -13,7 +13,7 @@ class FilesController {
 
     // get file info from request body
     const {
-      name, type, parentId = '0', isPublic = false, data,
+      name, type, parentId = 0, isPublic = false, data = undefined,
     } = req.body;
 
     // validate input & parent folder
@@ -47,41 +47,46 @@ class FilesController {
 
     // handle folder creation
     if (type === 'folder') {
-      // console.log(`***  ${JSON.stringify(newFileOrFolder)}  ***`);
-      await UtilsHelper.insertFileDoc(newFileOrFolder);
-      // console.log(`***  ${JSON.stringify(newFileOrFolder)}  ***`);
-      const { _id, ...rest } = newFileOrFolder;
-      const updatedFolder = { id: _id, ...rest };
-      // checker is case sensitive so '0' to 0
-      if (Number(updatedFolder.parentId) === 0) {
-        updatedFolder.parentId = 0;
+      try {
+        // console.log(`***  ${JSON.stringify(newFileOrFolder)}  ***`);
+        await UtilsHelper.insertFileDoc(newFileOrFolder);
+        // console.log(`***  ${JSON.stringify(newFileOrFolder)}  ***`);
+
+        const { _id, ...rest } = newFileOrFolder;
+        const updatedFolder = { id: _id, ...rest };
+        console.log('_> folder created in db');
+        return res.status(201).send(updatedFolder);
+      } catch (err) {
+        console.log('_> folder creation failed', err.message);
       }
-      return res.status(201).send(updatedFolder);
+    } else if (['file', 'image'].includes(type)) {
+      // handle file/image: save metadata in db
+      // and store file locally
+      try {
+        console.log('_> creating file/image...');
+        const path = process.env.FOLDER_PATH || '/tmp/files_manager';
+        await fsPromises.mkdir(path, { recursive: true });
+
+        const fileName = uuidv4();
+        const fileData = {
+          ...newFileOrFolder, localPath: `${path}/${fileName}`,
+        };
+
+        const insert = await UtilsHelper.insertFileDoc(fileData);
+        newFileOrFolder = {
+          id: insert.insertedId, ...newFileOrFolder,
+        };
+
+        await fsPromises.writeFile(
+          fileData.localPath, Buffer.from(data, 'base64'),
+        );
+        console.log('_> file saved successfully');
+        return res.status(201).send(newFileOrFolder);
+      } catch (err) {
+        console.log('_> file save failed:', err.message);
+      }
     }
-
-    // handle file/image: save metadata and store file locally
-    const path = process.env.FOLDER_PATH || '/tmp/files_manager';
-    await fsPromises.mkdir(path, { recursive: true });
-
-    const fileName = uuidv4();
-    const fileData = {
-      ...newFileOrFolder, localPath: `${path}/${fileName}`,
-    };
-
-    const insert = await UtilsHelper.insertFileDoc(fileData);
-    newFileOrFolder = {
-      id: insert.insertedId.toString(),
-      ...newFileOrFolder,
-    };
-
-    await fsPromises.writeFile(
-      fileData.localPath, Buffer.from(data, 'base64'),
-    );
-    // checker is case sensitive so '0' to 0
-    if (Number(newFileOrFolder.parentId) === 0) {
-      newFileOrFolder.parentId = 0;
-    }
-    return res.status(201).send(newFileOrFolder);
+    return undefined;
   }
 
   static async getShow(req, res) {
