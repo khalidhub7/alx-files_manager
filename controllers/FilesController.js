@@ -3,6 +3,7 @@ import { Buffer } from 'buffer';
 import { v4 as uuidv4 } from 'uuid';
 import { promises as fsPromises } from 'fs';
 import UtilsHelper from '../utils/utils';
+import fileQueue from '../worker';
 
 class FilesController {
   static async postUpload(req, res) {
@@ -54,16 +55,16 @@ class FilesController {
 
         const { _id, ...rest } = newFileOrFolder;
         const updatedFolder = { id: _id, ...rest };
-        console.log('_> folder created successfully');
+        console.log('_> folder created');
         return res.status(201).send(updatedFolder);
       } catch (err) {
-        console.log('_> folder creation failed', err.message);
+        console.log(`_> folder create failed: ${err.message}`);
       }
     } else if (['file', 'image'].includes(type)) {
       // handle file/image: save metadata in db
       // and store file locally
       try {
-        console.log('_> creating file/image...');
+        console.log('_> saving file');
         const path = process.env.FOLDER_PATH || '/tmp/files_manager';
         await fsPromises.mkdir(path, { recursive: true });
 
@@ -80,12 +81,23 @@ class FilesController {
         await fsPromises.writeFile(
           fileData.localPath, Buffer.from(data, 'base64'),
         );
-        console.log('_> file saved successfully');
+
+        if (insert.result.ok === 1 && type === 'image') {
+          const jobData = {
+            userId: fileData.userId.toString(),
+            fileId: newFileOrFolder.id.toString(),
+          };
+          await fileQueue.add(jobData);
+          console.log('_> thumbnail job added');
+        }
+
+        console.log('_> file saved');
         return res.status(201).send(newFileOrFolder);
       } catch (err) {
-        console.log('_> file/image creation failed:', err.message);
+        console.log(`_> file save failed: ${err.message}`);
       }
     }
+
     return undefined;
   }
 
@@ -159,7 +171,9 @@ class FilesController {
 
   // return file data if public or user has access
   static async getFile(req, res) {
-    const { id } = req.params;
+    const { id } = req.params; // file _id
+    const { size } = req.query;
+
     const file = await UtilsHelper.getFileById(id);
     const user = await UtilsHelper.getUserByToken(req);
 
@@ -175,26 +189,34 @@ class FilesController {
       return res.status(400).send({ error: "A folder doesn't have content" });
     }
     if (!file.localPath) {
-      console.log('here');
       return res.status(404).send({ error: 'Not found' });
     }
 
     // else return file
     let mimeType;
-    let buffer;
+    let base64Data;
+    let filePath;
     try {
-      console.log('_> getting file data');
+      console.log('_> reading file');
       mimeType = mime.lookup(file.localPath);
-      buffer = await fsPromises.readFile(file.localPath);
+
+      if (size && ['100', '250', '500'].includes(size)) {
+        filePath = `${file.localPath}_${size}`;
+      } else {
+        filePath = `${file.localPath}`;
+      }
+
+      base64Data = await fsPromises.readFile(filePath);
       res.setHeader('Content-Type', mimeType);
 
-      console.log('_> file data got successfully');
-      return res.end(buffer);
+      console.log('_> file read');
+      return res.end(base64Data);
     } catch (err) {
-      console.error('_> failed to get file data', err.message);
+      console.log(`_> file read failed: ${err.message}`);
       return res.status(404).send({ error: 'Not found' });
     }
   }
 }
 
 export default FilesController;
+export { fileQueue };
