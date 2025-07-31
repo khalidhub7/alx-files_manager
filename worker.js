@@ -1,9 +1,11 @@
+import Bull from 'bull';
 import thumbnail from 'image-thumbnail';
 import { promises as fsPromises } from 'fs';
-import Bull from 'bull';
+import dbClient from './utils/db';
 import UtilsHelper from './utils/utils';
 
 const fileQueue = new Bull('image_resizer');
+const userQueue = new Bull('welcome_email');
 
 fileQueue.process(async (job) => {
   const { fileId, userId } = job.data;
@@ -36,4 +38,20 @@ fileQueue.on('failed', (job, err) => {
   console.log(`_> Job ${job.id} failed: ${err.message}`);
 });
 
+userQueue.process(async (job) => {
+  try {
+    if (!job.data.userId) { throw new Error('Missing userId'); }
+    // let's retrieve user email
+    const user = await dbClient.db.collection('users')
+      .findOne({ _id: UtilsHelper.getValidId(job.data.userId) });
+    if (!user) { throw new Error('User not found'); }
+
+    console.log(`Welcome ${user.email}!`);
+  } catch (err) {
+    return err;
+  }
+  return undefined;
+});
+
 export default fileQueue;
+export { userQueue };

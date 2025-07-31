@@ -2,6 +2,7 @@ import sha1 from 'sha1';
 import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+import { userQueue } from '../worker';
 
 class UsersController {
   static async postNew(req, res) {
@@ -26,6 +27,7 @@ class UsersController {
 
     if (insert.result.ok === 1) {
       const id = insert.insertedId;
+      userQueue.add({ userId: id });
       return res.status(201).send({ id, email });
     }
     return undefined;
