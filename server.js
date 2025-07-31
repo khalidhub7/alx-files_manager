@@ -1,3 +1,5 @@
+// Project began 8 months ago, 
+// plus latest update based on README.md commit time
 import express from 'express';
 import router from './routes/index';
 
