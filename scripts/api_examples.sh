@@ -8,11 +8,11 @@ curl http://0.0.0.0:5000/users \
 
 # login with basic auth (base64: email:password)
 curl http://0.0.0.0:5000/connect \
-  -H "authorization: basic Ym9iQGR5bGFuLmNvbTp0b3RvMTIzNCE=" && echo ""
+  -H "authorization: Basic Ym9iQGR5bGFuLmNvbTp0b3RvMTIzNCE=" && echo ""
 
 # get current user info with x-token
 curl http://0.0.0.0:5000/users/me \
-  -H "x-token: a5422410-e28e-4ed1-9799-6de1bcc05db6" && echo ""
+  -H "x-token: 0c8d9e18-f61c-45a5-9890-66497b92d205" && echo ""
 
 # logout user with x-token
 curl http://0.0.0.0:5000/disconnect \
@@ -28,7 +28,7 @@ curl -X POST http://0.0.0.0:5000/files \
 
 # create a folder named "images"
 curl -X POST http://0.0.0.0:5000/files \
-  -H "x-token: a5422410-e28e-4ed1-9799-6de1bcc05db6" \
+  -H "x-token: 0db30d6f-0312-46c0-9c86-d3ee8b68bdae" \
   -H "content-type: application/json" \
   -d '{ "name": "images", "type": "folder" }' && echo ""
 
@@ -58,3 +58,10 @@ curl -X PUT http://0.0.0.0:5000/files/5f1e8896c7ba06511e683b25/unpublish \
 # get file content by file id and x-token
 curl -X GET http://0.0.0.0:5000/files/5f1e879ec7ba06511e683b22/data \
   -H "x-token: f21fb953-16f9-46ed-8d9c-84c6450ec80f" && echo ""
+
+# return resized image if size is given (100, 250, 500)
+curl -XGET http://0.0.0.0:5000/files/6883f05136e0820845b023c2/data?size=100 \
+  -o imagefromdb.png
+
+
+

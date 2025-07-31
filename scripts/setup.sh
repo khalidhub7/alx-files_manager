@@ -13,7 +13,7 @@ sudo chmod -R 755 ./data/db
 sudo mongod --dbpath ./data/db/
 
 npm run start-server
-npm run test main.test.js
+npm run test tests/controllers/AppController.test.js
 npm run dev redis_main.js
 
 # auto-fix js and python code style
